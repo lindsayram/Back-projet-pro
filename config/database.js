@@ -1,19 +1,19 @@
-// pool()
-//     .then(() => console.log("Connexion à Supabase réussie !"))
-//     .catch(err => console.error("Erreur de connexion à MongoDB :", err))
-
-
-// module.exports = pool.connection
-
-import pg from 'pg'
-const { Pool } = pg
+const pg = require('pg')
 require('dotenv').config()
 
-const connectionString = process.env.DATABASE_URL
+const { Pool } = pg
  
 const pool = new Pool({
-  connectionString,
+  connectionString: process.env.DATABASE_URL
 })
- 
-await pool.query('SELECT NOW()')
-await pool.end()
+
+const connectDB = async () => {
+  try {
+    await pool.query('SELECT NOW()')
+    console.log('Database connected')
+  } catch (err) {
+      console.error('Unable to connect to database :', err)
+  }
+}
+
+module.exports = {pool, connectDB}
