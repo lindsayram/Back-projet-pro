@@ -63,7 +63,9 @@ const register = async (req, res) => {
 
         // Register user
         const querynewUser = 
-            'INSERT INTO "Users"(pseudo_user, email_user, password_user) VALUES($1, $2, $3) RETURNING id_user, pseudo_user, email_user'
+            `INSERT INTO "Users"(pseudo_user, email_user, password_user) 
+            VALUES($1, $2, $3) 
+            RETURNING id_user, pseudo_user, email_user`
         const valuesNewUser = [pseudo, email, hash]
         const resNewUser = await pool.query(querynewUser, valuesNewUser)
 
@@ -76,7 +78,11 @@ const register = async (req, res) => {
         res.status(201).json({
             message: 'User create successfully',
             token,
-            user
+            user:{
+                id_user: user.id_user,
+                pseudo_user: user.pseudo_user,
+                email_user:user.email_user,
+            }
         })
 
     } catch (err) {
@@ -95,11 +101,15 @@ const login = async (req, res) => {
         }
 
         // Find user 
-        const queryExisitingUser = 'SELECT id_user, pseudo_user, email_user, password_user, COUNT(email_user) FROM "Users" WHERE email_user = $1 GROUP BY id_user'
-        const valuesExisitingUser = [email]
-        const resExisitingUser = await pool.query(queryExisitingUser, valuesExisitingUser)
+        const queryExistingUser = 
+            `SELECT id_user, pseudo_user, email_user, password_user, 
+            COUNT(email_user) 
+            FROM "Users" 
+            WHERE email_user = $1 GROUP BY id_user`
+        const valuesExistingUser = [email]
+        const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
 
-        const user = resExisitingUser.rows[0]
+        const user = resExistingUser.rows[0]
 
         // Search if user existing
         if (user.count < 1){
@@ -118,10 +128,15 @@ const login = async (req, res) => {
         const token = generateToken(user.id_user)
 
         // Display response
-        res.status(200).json ({
+        res.status(200).json({
             message: 'Login successful',
             token,
-            user
+            user:{
+                id_user: user.id_user,
+                pseudo_user: user.pseudo_user,
+                email_user:user.email_user,
+                // fk_id_privilege: name_privilege
+            }
         })
 
     } catch (err) {

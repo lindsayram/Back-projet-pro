@@ -21,6 +21,7 @@ const startServer = async () => {
 
 // Importing routes
 const authRoutes = require('./routes/authRoutes')
+const userRoutes = require('./routes/userRoutes')
 
 // Limiter le nb d'appel à notre API
 // const limiter = rateLimit({
@@ -41,6 +42,7 @@ app.use(express.json())
 
 // Monte le router sur le chemin de base
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/users', userRoutes)
 
 startServer()
 
