@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
 
         // Get user from token payload
         const queryExistingUser = 
-            `SELECT id_user, pseudo_user, email_user, 
+            `SELECT id_user, pseudo_user, email_user, password_user,
             COUNT(id_user) 
             FROM "Users"
             WHERE id_user = $1 GROUP BY id_user`
