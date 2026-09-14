@@ -12,7 +12,7 @@ const connectDB = async () => {
     await pool.query('SELECT NOW()')
     console.log('Database connected')
   } catch (err) {
-      console.error('Unable to connect to database :', err)
+    console.error('Unable to connect to database :', err)
   }
 }
 
