@@ -3,6 +3,7 @@ const { pool } = require('../config/database')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
 
+// Consult profile
 const profile = async (req, res) => {
     try {
         // ID recovery in URL
@@ -29,6 +30,7 @@ const profile = async (req, res) => {
     }
 }
 
+// Update profile
 const updateProfile = async (req, res) => {
     try {
         // User exists? (request preparation)
