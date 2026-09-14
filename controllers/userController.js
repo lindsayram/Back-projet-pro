@@ -90,8 +90,14 @@ const updateProfile = async (req, res) => {
         `UPDATE "Users" 
         SET pseudo_user = $1, email_user = $2, password_user = $3
         WHERE id_user = $4
-        RETURNING id_user, pseudo_user, email_user`
-        const valuesUpdateProfile = [req.user.pseudo_user, req.user.email_user, req.user.password_user, req.user.id_user]
+        RETURNING id_user, pseudo_user, email_user
+        `
+        const valuesUpdateProfile = [
+            req.user.pseudo_user, 
+            req.user.email_user, 
+            req.user.password_user, 
+            req.user.id_user
+        ]
         const resUpdateProfile = await pool.query(queryUpdateProfile, valuesUpdateProfile)
 
         const user = resUpdateProfile.rows[0]
