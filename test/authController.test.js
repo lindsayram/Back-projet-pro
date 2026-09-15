@@ -27,11 +27,11 @@ describe('US1: User registration '), () => {
 
     // Clean before test
     before(async () => {
-        await pool.query('DELETE FROM "Users" WHERE email_user IN $1', [testEmails])
+        await pool.query('DELETE FROM "Users" WHERE email_user ANY ($1)', [testEmails])
     })
 
     after(async () => {
-        await pool.query('DELETE FROM "Users" WHERE email_user IN $1', [testEmails])
+        await pool.query('DELETE FROM "Users" WHERE email_user ANY ($1)', [testEmails])
         await pool.end()
     })
 
@@ -86,7 +86,7 @@ describe('US1: User registration '), () => {
         userA = resA.body.user
 
         // Email duplicated
-        const resDup = createMockRes
+        const resDup = createMockRes()
         await register(reqA, resDup)
         assert.strictEqual(resDup.statusCode, 400)
     })
@@ -129,7 +129,7 @@ describe('US1: User registration '), () => {
         const reqA = {
             body: {
                 pseudo:'Alice',
-                email: 'test_us_a',
+                email: 'test_us_a@example.com',
                 password: ''
             }
         }
@@ -174,7 +174,7 @@ describe('US2: User login'), () => {
         const reqA = {
             body: {
                 email: '',
-                password: "Password1234!"
+                password: "Password123!"
             }
         }
         const resA = createMockRes()
