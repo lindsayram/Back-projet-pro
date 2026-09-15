@@ -53,8 +53,10 @@ const register = async (req, res) => {
         const valuesExistingUser = [email]
         const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
 
+        const user = resExistingUser.rows[0]
+
         // Check if user already exists (2.search in table)
-        if (resExistingUser.rows[0].count >= 1){
+        if (user.count >= 1){
             return res.status(400).json({message: "Email is alredy used"})
         }
 
@@ -69,19 +71,19 @@ const register = async (req, res) => {
         const valuesNewUser = [pseudo, email, hash]
         const resNewUser = await pool.query(querynewUser, valuesNewUser)
 
-        const user = resNewUser.rows[0]
+        const newUser = resNewUser.rows[0]
 
         // Generate token
-        const token = generateToken(user.id_user)
+        const token = generateToken(newUser.id_user)
 
         // Display response
         res.status(201).json({
             message: 'User create successfully',
             token,
-            user:{
-                id_user: user.id_user,
-                pseudo_user: user.pseudo_user,
-                email_user:user.email_user,
+            newUser:{
+                id_user: newUser.id_user,
+                pseudo_user: newUser.pseudo_user,
+                email_user:newUser.email_user,
             }
         })
 
@@ -112,8 +114,8 @@ const login = async (req, res) => {
         const user = resExistingUser.rows[0]
 
         // Search if user existing
-        if (user.count < 1){
-            return res.status(401).json ({message:  'Invalid credentials'})
+        if (!user){
+            return res.status(401).json ({message: 'Invalid credentials'})
         }
         
         // Compare password: DB vs body
