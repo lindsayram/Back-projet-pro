@@ -35,15 +35,17 @@ const updateProfile = async (req, res) => {
     try {
         // User exists? (request preparation)
         const queryExistingUser = 
-        `SELECT id_user, pseudo_user, email_user, password_user,
-        COUNT(id_user)
-        FROM "Users"
-        WHERE id_user = $1 GROUP BY id_user`
+            `SELECT id_user, pseudo_user, email_user, password_user,
+            COUNT(id_user)
+            FROM "Users"
+            WHERE id_user = $1 GROUP BY id_user`
         const valuesExistingUser = [req.user.id_user]
         const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
 
+        const user = resExistingUser.rows[0]
+
         // User exists?
-        if(resExistingUser.rows[0].count < 1){
+        if(!user){
             return res.status(404).json({message: 'User not found'})
         }
 
@@ -100,14 +102,14 @@ const updateProfile = async (req, res) => {
         ]
         const resUpdateProfile = await pool.query(queryUpdateProfile, valuesUpdateProfile)
 
-        const user = resUpdateProfile.rows[0]
+        const updatedProfile = resUpdateProfile.rows[0]
         
         res.status(200).json({
             message: "Profil update successfully",
             user:{
-                id_user: user.id_user,
-                pseudo_user: user.pseudo_user,
-                email_user: user.email_user
+                id_user: updatedProfile.id_user,
+                pseudo_user: updatedProfile.pseudo_user,
+                email_user: updatedProfile.email_user
             }
         })
 
