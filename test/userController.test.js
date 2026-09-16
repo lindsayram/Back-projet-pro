@@ -33,12 +33,22 @@ describe('US3: User\'s profile', () => {
 
     after(async () => {
         await pool.query('DELETE FROM "Users" WHERE id_user= $1', [userA.id])
+        await pool.end()
     })
 
     test('US3.1: User can consult his profile ', async ()=> {
         const req = {}
         const res = createMockRes()
         await profile(req, res)
+        console.log(res)
         assert.strictEqual(res.statusCode, 200)
     })
 })
+
+// describe('US4: Profile modification', () => {
+    
+// })
+
+// describe('US5: Profile deletion', () => {
+
+// })
