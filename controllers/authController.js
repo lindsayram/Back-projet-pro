@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-const {pool} = require('../config/database')
+const User = require('../models/authModel')
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -19,7 +19,7 @@ const generateToken = (id) => {
 const register = async (req, res) => {
     try {
         // Datas recovery
-        const { pseudo, email, password} = req.body
+        const {pseudo, email, password} = req.body
 
         // Fields not empty
         if(!pseudo || !email || !password) {
@@ -48,12 +48,8 @@ const register = async (req, res) => {
             return res.status(400).json({message : " You must provide a valid email"})
         }
 
-        // Check if user already exists (1.query preparation)
-        const queryExistingUser = 'SELECT COUNT(email_user) FROM "Users" WHERE email_user = $1'
-        const valuesExistingUser = [email]
-        const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
-
-        const user = resExistingUser.rows[0]
+        // Check if user already exists
+        const existingUser = async
 
         // Check if user already exists (2.search in table)
         if (user.count >= 1){

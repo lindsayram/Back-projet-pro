@@ -23,6 +23,7 @@ const startServer = async () => {
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const trainingRoutes = require('./routes/trainingRoutes')
+const equipmentRoutes = require('./routes/equipmentRoutes')
 
 // Limiter le nb d'appel à notre API
 // const limiter = rateLimit({
@@ -45,6 +46,7 @@ app.use(express.json())
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/trainings', trainingRoutes)
+app.use('/api/v1/equipments', equipmentRoutes)
 
 startServer()
 
