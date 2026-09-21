@@ -17,6 +17,22 @@ const isExisting = async (email) => {
     return user || null
 }
 
+// Id exists?
+const findById = async (id) => {
+    const queryExistingUser = `
+        SELECT id_user, pseudo_user, email_user, password_user,
+        COUNT(id_user) 
+        FROM "Users"
+        WHERE id_user = $1 GROUP BY id_user
+    `
+    const valuesExistingUser = [id]
+    const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
+
+    const user = resExistingUser.rows[0]
+
+    return user || null
+}
+
 // Create an user
 const createUser = async (pseudo, email, hashedPassword) => {
     const querynewUser = 
@@ -52,4 +68,4 @@ const updated = async (pseudo, email, hashedPassword, id) => {
     return updatedProfile
 }
 
-module.exports = {isExisting, createUser, updated}
+module.exports = {isExisting, findById, createUser, updated}

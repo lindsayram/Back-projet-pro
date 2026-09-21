@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const {pool} = require('../config/database')
+const User = require('../models/userModel')
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -21,20 +21,14 @@ const authMiddleware = async (req, res, next) => {
         const decoded = jwt.verify(token, JWT_SECRET)
 
         // Get user from token payload
-        const queryExistingUser = 
-            `SELECT id_user, pseudo_user, email_user, password_user,
-            COUNT(id_user) 
-            FROM "Users"
-            WHERE id_user = $1 GROUP BY id_user`
-        const valuesExistingUser = [decoded.id]
-        const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
-        
-        // Check if id exists (>=1)
-        if(resExistingUser.rows[0].count < 1) {
+        const isExisitingUser = await User.findById(decoded.id)
+
+        // Check if id exists
+        if(!isExisitingUser) {
             return res.status(401).json({message: 'User no longer exists'})
         }
 
-        req.user = resExistingUser.rows[0]
+        req.user = isExisitingUser
 
         // Next function
         next()
