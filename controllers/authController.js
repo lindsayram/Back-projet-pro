@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const validator = require('validator')
-const User = require('../models/authModel')
+const User = require('../models/userModel')
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -11,7 +11,7 @@ const JWT_EXPIRES_IN = '364d'
 
 // Helper to generate JWT token
 const generateToken = (id) => {
-    return jwt.sign({ id }, JWT_SECRET,  {
+    return jwt.sign({ id }, JWT_SECRET, {
         expiresIn: JWT_EXPIRES_IN
     })
 }
@@ -49,10 +49,9 @@ const register = async (req, res) => {
         }
 
         // Check if user already exists
-        const existingUser = async
-
-        // Check if user already exists (2.search in table)
-        if (user.count >= 1){
+        const isExistingUser = await User.isExisting(email)
+        
+        if (isExistingUser.count >= 1){
             return res.status(400).json({message: "Email is alredy used"})
         }
 
@@ -60,15 +59,8 @@ const register = async (req, res) => {
         const hash = await bcrypt.hash(password, 10)
 
         // Register user
-        const querynewUser = 
-            `INSERT INTO "Users"(pseudo_user, email_user, password_user) 
-            VALUES($1, $2, $3) 
-            RETURNING id_user, pseudo_user, email_user`
-        const valuesNewUser = [pseudo, email, hash]
-        const resNewUser = await pool.query(querynewUser, valuesNewUser)
-
-        const newUser = resNewUser.rows[0]
-
+        const newUser = await User.createUser(pseudo, email, hash)
+        
         // Generate token
         const token = generateToken(newUser.id_user)
 
@@ -98,24 +90,15 @@ const login = async (req, res) => {
             return res.status(400).json({message: 'Please provide email and password'})
         }
 
-        // Find user 
-        const queryExistingUser = 
-            `SELECT id_user, pseudo_user, email_user, password_user, 
-            COUNT(email_user) 
-            FROM "Users" 
-            WHERE email_user = $1 GROUP BY id_user`
-        const valuesExistingUser = [email]
-        const resExistingUser = await pool.query(queryExistingUser, valuesExistingUser)
-
-        const user = resExistingUser.rows[0]
-
-        // Search if user existing
-        if (!user){
-            return res.status(401).json ({message: 'Invalid credentials'})
+        // Check if user already exists
+        const isExistingUser = await User.isExisting(email)
+        
+        if (!isExistingUser.count){
+            return res.status(400).json({message: "Email is alredy used"})
         }
         
         // Compare password: DB vs body
-        const isMatch = await bcrypt.compare(password, user.password_user)
+        const isMatch = await bcrypt.compare(password, isExistingUser.password_user)
 
         // Not matched
         if(!isMatch){
@@ -123,16 +106,16 @@ const login = async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user.id_user)
+        const token = generateToken(isExistingUser.id_user)
 
         // Display response
         res.status(200).json({
             message: 'Login successful',
             token,
             user:{
-                id_user: user.id_user,
-                pseudo_user: user.pseudo_user,
-                email_user:user.email_user,
+                id_user: isExistingUser.id_user,
+                pseudo_user: isExistingUser.pseudo_user,
+                email_user:isExistingUser.email_user,
                 // fk_id_privilege: name_privilege
             }
         })
