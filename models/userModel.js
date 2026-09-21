@@ -14,7 +14,7 @@ const isExisting = async (email) => {
 
     const user = resExistingUser.rows[0]
 
-    return user
+    return user || null
 }
 
 // Create an user

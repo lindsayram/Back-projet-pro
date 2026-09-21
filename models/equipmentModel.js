@@ -32,7 +32,7 @@ const findEquipment = async (idEquipment) => {
 
     const existingEquipment = resExistingEquipment.rows[0]
     
-    return existingEquipment
+    return existingEquipment || null
 }
 
 // Update an equipment
@@ -69,15 +69,15 @@ const display = async (idUser) => {
 // Delete Equipment
 const deleteEquipment = async (idEquipment, idUser) => {
     const queryDeletedEquipment = `
-            DELETE FROM "Equipments"
-            WHERE id_equipment = $1 AND fk_id_user = $2
-        `
-        const valuesDeletedEquipment = [idEquipment, idUser]
-        const resDeletedEquipment = await pool.query(queryDeletedEquipment, valuesDeletedEquipment)
+        DELETE FROM "Equipments"
+        WHERE id_equipment = $1 AND fk_id_user = $2
+    `
+    const valuesDeletedEquipment = [idEquipment, idUser]
+    const resDeletedEquipment = await pool.query(queryDeletedEquipment, valuesDeletedEquipment)
 
-        const deletedEquipment = resDeletedEquipment.rows[0]
+    const deletedEquipment = resDeletedEquipment.rows[0]
 
-        return deletedEquipment
+    return deletedEquipment
 }
 
 module.exports = {createEquipment, findEquipment, updated, display, deleteEquipment}
