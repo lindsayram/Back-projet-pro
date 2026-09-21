@@ -1,5 +1,6 @@
 // Importing ressources
 const { pool } = require('../config/database')
+const Equipment = require('../models/equipmentModel')
 
 const addEquipment = async (req, res) => {
     try {
@@ -12,18 +13,7 @@ const addEquipment = async (req, res) => {
         }
 
         // Add 
-        const queryAddEquipment = `
-            WITH user_equipment as (
-                INSERT INTO "Equipments" (name_equipment, informations_equipment, fk_id_user)
-                VALUES($1, $2, $3)
-                RETURNING id_equipment, name_equipment, informations_equipment, fk_id_user
-            ) SELECT id_equipment, name_equipment, informations_equipment, id_user, pseudo_user FROM user_equipment
-                INNER JOIN "Users" ON fk_id_user = id_user
-        `
-        const valuesAddEquipment = [name, informations, req.user.id_user]
-        const resAddEquipment = await pool.query(queryAddEquipment, valuesAddEquipment)
-
-        const newEquipment = resAddEquipment.rows[0]
+        const newEquipment = await Equipment.createEquipment(name, informations, req.user.id_user)
 
         // Response
         res.status(201).json({
@@ -39,23 +29,15 @@ const addEquipment = async (req, res) => {
 const updateEquipment = async(req, res) => {
     try {
         // Equipment exists?
-        const queryExistingEquipment = `
-            SELECT id_equipment, fk_id_user,
-            COUNT(id_equipment)
-            FROM "Equipments"
-            WHERE id_equipment = $1 GROUP BY id_equipment
-        `
-        const valuesExistingEquipment = [req.params.idEquipment]
-        const resExistingEquipment = await pool.query(queryExistingEquipment, valuesExistingEquipment)
+        const isExistingEquipment = await Equipment.findEquipment(req.params.idEquipment)
 
-        const existingEquipment = resExistingEquipment.rows[0]
-
-        if(!existingEquipment){
+        
+        if(!isExistingEquipment.count){
             return res.status(404).json({message: 'Equipment not found'})
         }
         
         // Equipment is mine?
-        if(existingEquipment.fk_id_user != req.user.id_user){
+        if(isExistingEquipment.fk_id_user != req.user.id_user){
             return res.status(401).json({message: 'You are not authorized'})
         }
 
@@ -63,24 +45,15 @@ const updateEquipment = async(req, res) => {
         const {name, informations} = req.body
 
         if(name != null){
-            existingEquipment.name_equipment = name
+            isExistingEquipment.name_equipment = name
         }
 
         if(informations != null){
-            existingEquipment.informations_equipment = informations
+            isExistingEquipment.informations_equipment = informations
         }
 
         // Update (request)
-        const queryUpdatedEquipment = `
-            UPDATE "Equipments"
-            SET name_equipment = $1, informations_equipment = $2
-            WHERE id_equipment = $3 AND fk_id_user = $4
-            RETURNING *
-        `
-        const valuesUpdatedEquipment = [name, informations, req.params.idEquipment, req.user.id_user]
-        const resUpdatedEquipment = await pool.query(queryUpdatedEquipment, valuesUpdatedEquipment)
-
-        const updatedEquipment = resUpdatedEquipment.rows[0]
+        const updatedEquipment = await Equipment.updated(name, informations, req.params.idEquipment, req.user.id_user)
 
         // Response
         res.status(200).json({
@@ -99,15 +72,7 @@ const updateEquipment = async(req, res) => {
 const getEquipment = async(req, res) => {
     try {
         //get (request)
-        const queryGetEquipment = `
-            SELECT name_equipment, informations_equipment
-            FROM "Equipments"
-            WHERE fk_id_user = $1    
-        ` 
-        const valuesGetEquipment = [req.user.id_user]
-        const resGetEquipment = await pool.query(queryGetEquipment, valuesGetEquipment)
-
-        const myEquipments = resGetEquipment.rows
+        const myEquipments = await Equipment.display(req.user.id_user)
 
         // Response
         res.status(200).json({
@@ -122,35 +87,19 @@ const getEquipment = async(req, res) => {
 const deleteEquipment = async(req,res) => {
     try {
         // Equipment exists?
-        const queryExistingEquipment = `
-            SELECT id_equipment, fk_id_user,
-            COUNT(id_equipment)
-            FROM "Equipments"
-            WHERE id_equipment = $1 GROUP BY id_equipment
-        `
-        const valuesExistingEquipment = [req.params.idEquipment]
-        const resExistingEquipment = await pool.query(queryExistingEquipment, valuesExistingEquipment)
+        const isExistingEquipment = await Equipment.findEquipment(req.params.idEquipment)
 
-        const existingEquipment = resExistingEquipment.rows[0]
-
-        if(!existingEquipment){
+        if(!isExistingEquipment){
             return res.status(404).json({message: 'Equipment not found'})
         }
         
         // Equipment is mine?
-        if(existingEquipment.fk_id_user != req.user.id_user){
+        if(isExistingEquipment.fk_id_user != req.user.id_user){
             return res.status(401).json({message: 'You are not authorized'})
         }
 
         // Delete(request)
-        const queryDeletedEquipment = `
-            DELETE FROM "Equipments"
-            WHERE id_equipment = $1 AND fk_id_user = $2
-        `
-        const valuesDeletedEquipment = [req.params.idEquipment, req.user.id_user]
-        const resDeletedEquipment = await pool.query(queryDeletedEquipment, valuesDeletedEquipment)
-
-        const deletedEquipment = resDeletedEquipment.rows[0]
+        await Equipment.deleteEquipment(req.params.idEquipment, req.user.id_user)
 
         // Response
         res.status(200).json({message: 'Equipment was deleted successfully'})

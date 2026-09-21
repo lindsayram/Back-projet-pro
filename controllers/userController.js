@@ -19,7 +19,6 @@ const updateProfile = async (req, res) => {
     try {
         // User exists? (request preparation)
         const isExistingUser = await User.isExisting (req.user.email_user)
-        
 
         if (!isExistingUser.count){
             return res.status(400).json({message: "Email is alredy used"})
