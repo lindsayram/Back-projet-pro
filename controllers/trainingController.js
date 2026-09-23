@@ -87,8 +87,6 @@ const getTraining = async (req, res) => {
                 message : 'You have not trainings yet'
             })
         }
-        
-
     } catch (err) {
         res.status(500).json({message: "Server error during get trainings", error: err.message})
     }
@@ -113,7 +111,7 @@ const deleteTraining = async (req, res) => {
         await Training.deleteTraining(req.params.idTraining, req.user.id_user)
 
         // Response
-        res.status(200).json({message : 'Your training are deleted successfully'})
+        res.status(200).json({message : 'Your training is deleted successfully'})
 
     } catch (err) {
         res.status(500).json({message : 'Server error during training deletion', error: err.message})

@@ -50,8 +50,8 @@ const register = async (req, res) => {
 
         // Check if user already exists
         const isExistingUser = await User.isExisting(email)
-        
-        if (isExistingUser.count >= 1){
+        console.log(isExistingUser)
+        if (isExistingUser){
             return res.status(400).json({message: "Email is alredy used"})
         }
 

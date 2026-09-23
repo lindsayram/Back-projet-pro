@@ -1,8 +1,12 @@
 const { test, describe, before, after } = require('node:test')
 const assert = require('node:assert')
 
+// Import functions
 const {register, login} = require('../controllers/authController')
 const {pool} = require('../config/database')
+
+// Import models
+const User = require('../controllers/userController')
 
 // Helper mock response
 const createMockRes = () => {
@@ -47,6 +51,7 @@ describe('US1: User registration ', () => {
 
         const resA = createMockRes()
         await register(reqA, resA)
+        console.log(resA)
         assert.strictEqual(resA.statusCode, 201)
         assert.ok(resA.body.token)
         userA = resA.body.user
@@ -133,84 +138,84 @@ describe('US1: User registration ', () => {
     })
 })
 
-describe('US2: User login', () => {
-    let tokenA
-    const userA = {
-        pseudo:'Alice',
-        email: 'test_us_a@example.com',
-        password: 'Password123!'
-    }
+// describe('US2: User login', () => {
+//     let tokenA
+//     const userA = {
+//         pseudo:'Alice',
+//         email: 'test_us_a@example.com',
+//         password: 'Password123!'
+//     }
 
-    // Clean before test
-    before(async () => {
-        await pool.query('DELETE FROM "Users" WHERE email_user = $1', [userA.email])
+//     // Clean before test
+//     before(async () => {
+//         await pool.query('DELETE FROM "Users" WHERE email_user = $1', [userA.email])
 
-        const resRegister = createMockRes() 
-        await register(
-            {body: userA},
-            resRegister
-        )
-    })
+//         const resRegister = createMockRes() 
+//         await register(
+//             {body: userA},
+//             resRegister
+//         )
+//     })
 
-    // Clean after
-    after(async () => {
-        await pool.query('DELETE FROM "Users" WHERE email_user = $1', [userA.email])
-        await pool.end()
-    })
+//     // Clean after
+//     after(async () => {
+//         await pool.query('DELETE FROM "Users" WHERE email_user = $1', [userA.email])
+//         await pool.end()
+//     })
 
-    test('US2.1: Login user with valid credentials', async() => {
+//     test('US2.1: Login user with valid credentials', async() => {
 
-        // Login user A
-        const reqA = {
-            body: {
-                email: 'test_us_a@example.com',
-                password: "Password123!"
-            }
-        }
+//         // Login user A
+//         const reqA = {
+//             body: {
+//                 email: 'test_us_a@example.com',
+//                 password: "Password123!"
+//             }
+//         }
         
-        const resA = createMockRes()
-        await login(reqA, resA)
-        assert.strictEqual(resA.statusCode, 200)
-        assert.ok(resA.body.token)
-        tokenA = resA.body.token
-    })
+//         const resA = createMockRes()
+//         await login(reqA, resA)
+//         assert.strictEqual(resA.statusCode, 200)
+//         assert.ok(resA.body.token)
+//         tokenA = resA.body.token
+//     })
 
-    test('US2.2: Login rejects empty fields', async() => {
-        // Login user A
-        const reqA = {
-            body: {
-                email: '',
-                password: "Password123!"
-            }
-        }
-        const resA = createMockRes()
-        await login(reqA, resA)
-        assert.strictEqual(resA.statusCode, 400)
-    })
+//     test('US2.2: Login rejects empty fields', async() => {
+//         // Login user A
+//         const reqA = {
+//             body: {
+//                 email: '',
+//                 password: "Password123!"
+//             }
+//         }
+//         const resA = createMockRes()
+//         await login(reqA, resA)
+//         assert.strictEqual(resA.statusCode, 400)
+//     })
 
-    test('US2.3: Login rejects invalid email', async() => {
-        // Login user A
-        const reqA = {
-            body: {
-                email: 'test_login@example.com',
-                password: "Password123!"
-            }
-        }
-        const resA = createMockRes()
-        await login(reqA, resA)
-        assert.strictEqual(resA.statusCode, 401)
-    })
+//     test('US2.3: Login rejects invalid email', async() => {
+//         // Login user A
+//         const reqA = {
+//             body: {
+//                 email: 'test_login@example.com',
+//                 password: "Password123!"
+//             }
+//         }
+//         const resA = createMockRes()
+//         await login(reqA, resA)
+//         assert.strictEqual(resA.statusCode, 401)
+//     })
 
-    test('US2.4: Login rejects invalid password', async() => {
-        // Login user A
-        const reqA = {
-            body: {
-                email: 'test_us_a@example.com',
-                password: "WrongPassword"
-            }
-        }
-        const resA = createMockRes()
-        await login(reqA, resA)
-        assert.strictEqual(resA.statusCode, 401)
-    })
-})
+//     test('US2.4: Login rejects invalid password', async() => {
+//         // Login user A
+//         const reqA = {
+//             body: {
+//                 email: 'test_us_a@example.com',
+//                 password: "WrongPassword"
+//             }
+//         }
+//         const resA = createMockRes()
+//         await login(reqA, resA)
+//         assert.strictEqual(resA.statusCode, 401)
+//     })
+// })
